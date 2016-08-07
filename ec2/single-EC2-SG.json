@@ -108,8 +108,8 @@
         }
       }
     },
-    
-    
+
+
             "SGBaseIngress": {
             "Type": "AWS::EC2::SecurityGroupIngress",
             "Properties": {
@@ -117,11 +117,13 @@
                 "IpProtocol": "tcp",
                 "FromPort": "8080",
                 "ToPort": "8080",
-                "SourceSecurityGroupName": { "Ref": "InstanceSecurityGroup" }
+                "CidrIp": {
+                  "Ref": "SSHLocation"
+                }
             }
         }
-        
-        
+
+
   },
   "Outputs": {
     "InstanceId": {
