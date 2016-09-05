@@ -1,0 +1,174 @@
+{
+   "AWSTemplateFormatVersion" : "2010-09-09",
+   "Description" : "AppVPC",
+   "Resources" : {
+      "AppVPC" : {
+         "Type" : "AWS::EC2::VPC",
+         "Properties" : {
+            "CidrBlock" : "10.100.0.0/16",
+    	    "EnableDnsSupport" : "true",
+    	    "EnableDnsHostnames" : "true",
+            "InstanceTenancy" : "default",
+            "Tags" : [ {"Key" : "Name", "Value" : "appvpc"} ]
+         }
+      },
+
+      "Pub1" :{
+        "Type" : "AWS::EC2::Subnet",
+        "Properties" : {
+          "VpcId" : { "Ref": "AppVPC" },
+          "CidrBlock" : "10.100.64.0/26",
+          "AvailabilityZone" : "us-east-1a",
+          "Tags" : [ {"Key" : "Name", "Value" : "public-1"} ]
+        }
+      } ,
+
+      "Pub2" :{
+        "Type" : "AWS::EC2::Subnet",
+        "Properties" : {
+          "VpcId" : { "Ref": "AppVPC" },
+          "CidrBlock" : "10.100.64.128/26",
+          "AvailabilityZone" : "us-east-1e",
+          "Tags" : [ {"Key" : "Name", "Value" : "public-2"} ]
+        }
+      },
+
+      "Pub3" :{
+        "Type" : "AWS::EC2::Subnet",
+        "Properties" : {
+          "VpcId" : { "Ref": "AppVPC" },
+          "CidrBlock" : "10.100.64.192/26",
+          "AvailabilityZone" : "us-east-1d",
+          "Tags" : [ {"Key" : "Name", "Value" : "public-3"} ]
+        }
+      },
+
+      "Priv1" :{
+        "Type" : "AWS::EC2::Subnet",
+        "Properties" : {
+          "VpcId" : { "Ref": "AppVPC" },
+          "CidrBlock" : "10.100.64.64/26",
+          "AvailabilityZone" : "us-east-1c",
+          "Tags" : [ {"Key" : "Name", "Value" : "private-1"} ]
+        }
+      },
+
+    "IGW" :{
+      "Type" : "AWS::EC2::InternetGateway",
+      "Properties" : {
+        "Tags" : [ {"Key" : "Name", "Value" : "myIGW"}]
+
+      }
+    },
+
+    "AttachIGW" : {
+      "Type" : "AWS::EC2::VPCGatewayAttachment",
+      "Properties" : {
+        "VpcId" : { "Ref": "AppVPC"},
+        "InternetGatewayId" : { "Ref" : "IGW" }
+      }
+    },
+
+  "PubRouteTable" : {
+    "Type" : "AWS::EC2::RouteTable",
+    "Properties" : {
+      "VpcId" : { "Ref" : "AppVPC" },
+      "Tags" : [ {"Key" : "Name", "Value" : "PubRouteTable"}]
+
+    }
+  },
+
+  "PubRoute" : {
+    "Type" : "AWS::EC2::Route",
+    "Properties" : {
+      "RouteTableId" : { "Ref" : "PubRouteTable" },
+      "DestinationCidrBlock" : "0.0.0.0/0",
+      "GatewayId" : { "Ref" : "IGW" }
+    }
+  },
+
+  "PubRouteAssociation" : {
+    "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+    "Properties" :{
+      "RouteTableId" : { "Ref" : "PubRouteTable"},
+      "SubnetId" :  {"Ref" : "Pub1"}
+    }
+  },
+
+  "PubRouteAssociation2" : {
+    "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+    "Properties" :{
+      "RouteTableId" : { "Ref" : "PubRouteTable"},
+      "SubnetId" :  {"Ref" : "Pub2"}
+    }
+  },
+
+  "PubRouteAssociation3" : {
+    "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+    "Properties" :{
+      "RouteTableId" : { "Ref" : "PubRouteTable"},
+      "SubnetId" :  {"Ref" : "Pub3"}
+    }
+  },
+
+   "PubSecurityGroup" : {
+     "Type" : "AWS::EC2::SecurityGroup",
+     "Properties" : {
+     "GroupDescription" : "Http Access",
+     "VpcId" : {"Ref" : "AppVPC"},
+     "SecurityGroupIngress" : [{
+          "IpProtocol" : "tcp",
+          "FromPort" : "80",
+          "ToPort" : "80",
+          "CidrIp" : "0.0.0.0/0" }],
+    "Tags" : [ {"Key" : "Name", "Value" : "PubSecurityGroup"}]
+
+    }
+  },
+
+  "PubSecurityGroupIngress" : {
+    "Type" : "AWS::EC2::SecurityGroupIngress",
+    "Properties" : {
+      "GroupId": { "Ref": "PubSecurityGroup" },
+      "IpProtocol": "tcp",
+      "FromPort": "22",
+      "ToPort": "22",
+      "CidrIp": "0.0.0.0/0"
+    }
+  },
+
+ "DatabaseSG" : {
+   "Type" : "AWS::EC2::SecurityGroup",
+   "Properties" : {
+     "GroupDescription" : "Database Access",
+     "VpcId" : {"Ref" : "AppVPC"},
+     "SecurityGroupIngress" : [{
+          "IpProtocol" : "tcp",
+          "FromPort" : "3306",
+          "ToPort" : "3306",
+          "SourceSecurityGroupId" : { "Ref" : "PubSecurityGroup"}
+        }],
+  "Tags" : [ {"Key" : "Name", "Value" : "DatabaseSG"}]
+
+      }
+    }
+  } ,
+  "Outputs" : {
+  "public1" : {
+    "Description": "Public Subnets",
+    "Value" : { "Ref" : "Pub1" }
+  },
+
+  "public2" : {
+    "Description": "Public Subnets 2",
+    "Value" : { "Ref" : "Pub2" }
+
+  },
+
+  "public3" : {
+    "Description": "Public Subnets 3",
+    "Value" : { "Ref" : "Pub3" }
+
+  }
+}
+}

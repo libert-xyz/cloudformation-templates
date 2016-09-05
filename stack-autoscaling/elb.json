@@ -1,0 +1,113 @@
+{
+   "AWSTemplateFormatVersion" : "2010-09-09",
+   "Description" : "ELB",
+   "Parameters": {
+  "Pub1": {
+    "Type": "AWS::EC2::Subnet::Id"
+  },
+  "Pub2": {
+    "Type": "AWS::EC2::Subnet::Id"
+  },
+  "Pub3": {
+    "Type": "AWS::EC2::Subnet::Id"
+  }
+},
+
+"Mappings": {
+
+  "Region2ELBAccountId": {
+  "us-east-1"      : { "AccountId": "127311923021" },
+  "us-west-1"      : { "AccountId": "027434742980" },
+  "us-west-2"      : { "AccountId": "797873946194" }
+  },
+
+  "Region2ARNPrefix": {
+    "us-east-1"      : { "ARNPrefix": "arn:aws:" },
+    "us-west-1"      : { "ARNPrefix": "arn:aws:" },
+    "us-west-2"      : { "ARNPrefix": "arn:aws:" },
+    "cn-north-1"     : { "ARNPrefix": "arn:aws-cn:" }
+      }
+},
+
+   "Resources" : {
+
+     "ELB" : {
+
+       "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+   "Properties": {
+      "CrossZone" : "True",
+      "HealthCheck" : {
+        "Target" : "HTTP:80/",
+          "HealthyThreshold" : "3",
+          "UnhealthyThreshold" : "5",
+          "Interval" : "30",
+          "Timeout" : "5"
+      },
+      "LoadBalancerName" : "ELB-APP",
+
+      "Listeners" : [ {
+          "LoadBalancerPort" : "80",
+          "InstancePort" : "80",
+          "Protocol" : "HTTP"
+        } ],
+
+        "Subnets" : [
+                      { "Ref" : "Pub1"} ,
+                      { "Ref" : "Pub2"} ,
+                      { "Ref" : "Pub3"}
+                    ],
+
+      "Tags" : [ {"Key" : "Name", "Value" : "ELB-APP"} ],
+
+      "AccessLoggingPolicy" : {
+        "S3BucketName": {
+            "Ref": "LogsBucket"
+          },
+          "S3BucketPrefix": "Logs",
+          "Enabled": "true",
+          "EmitInterval": "60"
+          }
+      },
+      "DependsOn": "LogsBucketPolicy"
+    },
+    "LogsBucket": {
+      "Type": "AWS::S3::Bucket",
+      "DeletionPolicy" : "Delete"
+    },
+    "LogsBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "LogsBucket"
+        },
+        "PolicyDocument": {
+  "Version": "2008-10-17",
+  "Statement": [
+    {
+      "Sid": "ELBAccessLogs20130930",
+      "Effect": "Allow",
+      "Resource": {
+        "Fn::Join": [ "", [ { "Fn::FindInMap" : ["Region2ARNPrefix", {"Ref" : "AWS::Region"}, "ARNPrefix"] },
+                      "s3:::", { "Ref": "LogsBucket" }, "/", "Logs", "/ELBLogs/", { "Ref": "AWS::AccountId" }, "/*" ] ]
+      },
+      "Principal": { "AWS": { "Fn::FindInMap": [ "Region2ELBAccountId", { "Ref": "AWS::Region" }, "AccountId" ] } },
+      "Action": [ "s3:PutObject" ]
+    }]
+        }
+      }
+    }
+  },
+
+  "Outputs": {
+  "URL": {
+    "Description": "URL ELB",
+    "Value": { "Fn::Join": [ "", [ "http://", { "Fn::GetAtt": [ "ELB", "DNSName" ] } ] ] }
+  },
+
+  "ELBAccessLogsBucket": {
+    "Description": "DNS name of the S3 bucket storing ELB Access Logs",
+    "Value": { "Fn::GetAtt": [ "LogsBucket", "DomainName" ] }
+  }
+}
+
+}
