@@ -10,6 +10,9 @@
   },
   "Pub3": {
     "Type": "AWS::EC2::Subnet::Id"
+  },
+  "ElbSG" : {
+    "Type": "AWS::EC2::SecurityGroup::Id"
   }
 },
 
@@ -37,13 +40,14 @@
    "Properties": {
       "CrossZone" : "True",
       "HealthCheck" : {
-        "Target" : "HTTP:80/",
+        "Target" : "TCP:80",
           "HealthyThreshold" : "3",
           "UnhealthyThreshold" : "5",
           "Interval" : "30",
           "Timeout" : "5"
       },
       "LoadBalancerName" : "ELB-APP",
+      "CrossZone" : "true",
 
       "Listeners" : [ {
           "LoadBalancerPort" : "80",
@@ -51,6 +55,11 @@
           "Protocol" : "HTTP"
         } ],
 
+        "SecurityGroups" : [
+
+                    { "Ref" : "ElbSG" }
+
+                    ],
         "Subnets" : [
                       { "Ref" : "Pub1"} ,
                       { "Ref" : "Pub2"} ,
@@ -72,7 +81,7 @@
     },
     "LogsBucket": {
       "Type": "AWS::S3::Bucket",
-      "DeletionPolicy" : "Delete"
+      "DeletionPolicy" : "Retain"
     },
     "LogsBucketPolicy": {
       "Type": "AWS::S3::BucketPolicy",
@@ -88,7 +97,7 @@
       "Effect": "Allow",
       "Resource": {
         "Fn::Join": [ "", [ { "Fn::FindInMap" : ["Region2ARNPrefix", {"Ref" : "AWS::Region"}, "ARNPrefix"] },
-                      "s3:::", { "Ref": "LogsBucket" }, "/", "Logs", "/ELBLogs/", { "Ref": "AWS::AccountId" }, "/*" ] ]
+                      "s3:::", { "Ref": "LogsBucket" }, "/", "Logs", "/AWSLogs/", { "Ref": "AWS::AccountId" }, "/*" ] ]
       },
       "Principal": { "AWS": { "Fn::FindInMap": [ "Region2ELBAccountId", { "Ref": "AWS::Region" }, "AccountId" ] } },
       "Action": [ "s3:PutObject" ]
@@ -106,8 +115,9 @@
 
   "ELBAccessLogsBucket": {
     "Description": "DNS name of the S3 bucket storing ELB Access Logs",
-    "Value": { "Fn::GetAtt": [ "LogsBucket", "DomainName" ] }
-  }
-}
+    "Value": { "Fn::GetAtt": [ "LogsBucket", "DomainName" ]
 
+      }
+    }
+  }
 }

@@ -17,10 +17,22 @@
                "Parameters": {
                   "Pub1" : { "Fn::GetAtt" : [ "VPC", "Outputs.public1" ] },
                   "Pub2" : { "Fn::GetAtt" : [ "VPC", "Outputs.public2" ] },
-                  "Pub3" : { "Fn::GetAtt" : [ "VPC", "Outputs.public3" ] }
+                  "Pub3" : { "Fn::GetAtt" : [ "VPC", "Outputs.public3" ] },
+                  "ElbSG" : { "Fn::GetAtt" : [ "VPC", "Outputs.SGElb" ] }
                },
                "TimeoutInMinutes": "60"
            }
+       },
+
+       "LaunchConfig" : {
+         "Type": "AWS::CloudFormation::Stack",
+         "Properties": {
+             "TemplateURL": "https://s3.amazonaws.com/cloudformation-stack-custom/launchConfig.json",
+             "Parameters": {
+                "SG" : { "Fn::GetAtt" : [ "VPC", "Outputs.PubSecurityGroup" ] }
+             },
+             "TimeoutInMinutes": "60"
+
        }
    }
 }

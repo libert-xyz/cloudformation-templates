@@ -151,7 +151,24 @@
   "Tags" : [ {"Key" : "Name", "Value" : "DatabaseSG"}]
 
       }
-    }
+    },
+
+  "ElbSG" : {
+    "Type" : "AWS::EC2::SecurityGroup",
+    "Properties" : {
+      "GroupDescription" : "Load Balancer Security Group",
+      "VpcId" : {"Ref" : "AppVPC"},
+      "SecurityGroupIngress" : [{
+           "IpProtocol" : "tcp",
+           "FromPort" : "80",
+           "ToPort" : "80",
+           "CidrIp" : "0.0.0.0/0"
+         }],
+   "Tags" : [ {"Key" : "Name", "Value" : "ElbSG"}]
+
+       }
+     }
+
   } ,
   "Outputs" : {
   "public1" : {
@@ -169,6 +186,15 @@
     "Description": "Public Subnets 3",
     "Value" : { "Ref" : "Pub3" }
 
+  },
+
+  "SGElb" : {
+    "Description" : "Load Balancer SecurityGroup",
+    "Value" : { "Ref" : "ElbSG"}
+  },
+  "InstanceSG" : {
+    "Description" : "Instance/LaunchConfiguration SG",
+    "Value" : { "Ref" : "PubSecurityGroup"}
   }
-}
-}
+    }
+      }

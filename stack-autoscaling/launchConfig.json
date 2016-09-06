@@ -1,0 +1,29 @@
+{
+   "AWSTemplateFormatVersion" : "2010-09-09",
+   "Description" : "LaunchConfiguration",
+   "Parameters": {
+  "SG": {
+    "Type": "AWS::EC2::SecurityGroup::Id"
+  }
+},
+
+   "Resources" : {
+     "LaunchConfig" : {
+       "Type" : "AWS::AutoScaling::LaunchConfiguration",
+       "AssociatePublicIpAddress" : "True",
+       "ImageId" : "ami-2051294a",
+       "SecurityGroups" : [ { "Ref" : "SG" } ],
+       "InstanceType" : "t2.micro",
+       "InstanceMonitoring" : "false",
+
+     }
+  },
+
+  "Outputs": {
+  "URL": {
+    "Description": "LaunchConfiguration Id",
+    "Value": { "Ref" :  "LaunchConfig"}
+  },
+
+  }
+}
