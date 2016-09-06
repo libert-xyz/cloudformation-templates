@@ -29,10 +29,11 @@
          "Properties": {
              "TemplateURL": "https://s3.amazonaws.com/cloudformation-stack-custom/launchConfig.json",
              "Parameters": {
-                "SG" : { "Fn::GetAtt" : [ "VPC", "Outputs.PubSecurityGroup" ] }
+                "SG" : { "Fn::GetAtt" : [ "VPC", "Outputs.InstanceSG" ] }
              },
              "TimeoutInMinutes": "60"
 
        }
+     }
    }
-}
+ }

@@ -10,12 +10,13 @@
    "Resources" : {
      "LaunchConfig" : {
        "Type" : "AWS::AutoScaling::LaunchConfiguration",
-       "AssociatePublicIpAddress" : "True",
-       "ImageId" : "ami-2051294a",
-       "SecurityGroups" : [ { "Ref" : "SG" } ],
-       "InstanceType" : "t2.micro",
-       "InstanceMonitoring" : "false",
-
+       "Properties" : {
+         "AssociatePublicIpAddress" : "true",
+         "ImageId" : "ami-2051294a",
+         "SecurityGroups" : [ { "Ref" : "SG" } ],
+         "InstanceType" : "t2.micro",
+         "InstanceMonitoring" : "false"
+       }
      }
   },
 
