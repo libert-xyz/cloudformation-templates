@@ -1,0 +1,40 @@
+{
+   "AWSTemplateFormatVersion" : "2010-09-09",
+   "Description" : "LaunchConfiguration",
+   "Parameters": {
+
+  "LaunchConf": {
+    "Type": "String"
+  },
+  "Pub1": {
+    "Type": "AWS::EC2::Subnet::Id"
+  },
+  "Pub2": {
+    "Type": "AWS::EC2::Subnet::Id"
+  },
+  "Pub3": {
+    "Type": "AWS::EC2::Subnet::Id"
+  },
+  "Elb" : {
+    "Type" : "String"
+  }
+},
+
+   "Resources" : {
+     "AuntoScaling" : {
+       "Type" : "AWS::AutoScaling::AutoScalingGroup",
+       "Properties" : {
+         "LaunchConfigurationName" : { "Ref" : "LaunchConf"},
+         "MinSize" : "1",
+         "MaxSize" : "2",
+         "VPCZoneIdentifier" : [
+                       { "Ref" : "Pub1"} ,
+                       { "Ref" : "Pub2"} ,
+                       { "Ref" : "Pub3"}
+                     ],
+
+         "LoadBalancerNames" : [{ "Ref": "Elb"}]
+      }
+     }
+   }
+ }

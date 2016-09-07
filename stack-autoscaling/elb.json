@@ -113,6 +113,11 @@
     "Value": { "Fn::Join": [ "", [ "http://", { "Fn::GetAtt": [ "ELB", "DNSName" ] } ] ] }
   },
 
+  "LoadBalancer": {
+    "Description": "ELB",
+    "Value" : { "Ref" : "ELB"}
+  },
+
   "ELBAccessLogsBucket": {
     "Description": "DNS name of the S3 bucket storing ELB Access Logs",
     "Value": { "Fn::GetAtt": [ "LogsBucket", "DomainName" ]

@@ -21,7 +21,7 @@
   },
 
   "Outputs": {
-  "URL": {
+  "LaunchConfiguration": {
     "Description": "LaunchConfiguration Id",
     "Value": { "Ref" :  "LaunchConfig"}
   },
