@@ -1,6 +1,6 @@
 {
    "AWSTemplateFormatVersion" : "2010-09-09",
-   "Description" : "LaunchConfiguration",
+   "Description" : "AutoScaling",
    "Parameters": {
 
   "LaunchConf": {
@@ -35,6 +35,62 @@
 
          "LoadBalancerNames" : [{ "Ref": "Elb"}]
       }
+    },
+
+     "ScaleUpPolicy" : {
+        "Type" : "AWS::AutoScaling::ScalingPolicy",
+        "Properties" : {
+           "AdjustmentType" : "ChangeInCapacity",
+           "AutoScalingGroupName" : { "Ref" : "AuntoScaling" },
+           "Cooldown" : "10",
+           "ScalingAdjustment" : "1"
+        }
+     },
+     "CPUAlarmHigh": {
+        "Type": "AWS::CloudWatch::Alarm",
+        "Properties": {
+           "EvaluationPeriods": "1",
+           "Statistic": "Average",
+           "Threshold": "80",
+           "AlarmDescription": "Alarm if CPU too high or metric disappears indicating instance is down",
+           "Period": "60",
+           "AlarmActions": [ { "Ref": "ScaleUpPolicy" } ],
+           "Namespace": "AWS/EC2",
+           "Dimensions": [ {
+              "Name": "AutoScalingGroupName",
+              "Value": { "Ref": "AuntoScaling" }
+           } ],
+           "ComparisonOperator": "GreaterThanThreshold",
+           "MetricName": "CPUUtilization"
+        }
+     },
+
+     "ScaleDownPolicy" : {
+        "Type" : "AWS::AutoScaling::ScalingPolicy",
+        "Properties" : {
+           "AdjustmentType" : "ChangeInCapacity",
+           "AutoScalingGroupName" : { "Ref" : "AuntoScaling" },
+           "Cooldown" : "10",
+           "ScalingAdjustment" : "-1"
+        }
+     },
+     "CPUAlarmLow": {
+        "Type": "AWS::CloudWatch::Alarm",
+        "Properties": {
+           "EvaluationPeriods": "1",
+           "Statistic": "Average",
+           "Threshold": "20",
+           "AlarmDescription": "Alarm if CPU too low",
+           "Period": "60",
+           "AlarmActions": [ { "Ref": "ScaleDownPolicy" } ],
+           "Namespace": "AWS/EC2",
+           "Dimensions": [ {
+              "Name": "AutoScalingGroupName",
+              "Value": { "Ref": "AuntoScaling" }
+           } ],
+           "ComparisonOperator": "LessThanThreshold",
+           "MetricName": "CPUUtilization"
+         }
      }
    }
  }

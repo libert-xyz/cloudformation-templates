@@ -1,0 +1,67 @@
+{
+   "AWSTemplateFormatVersion" : "2010-09-09",
+   "Description" : "IAM Roles",
+
+   "Resources" : {
+     "S3": {
+                "Type": "AWS::IAM::Role",
+                "Properties": {
+                    "AssumeRolePolicyDocument": {
+                        "Statement": [
+                            {
+                                "Effect": "Allow",
+                                "Principal": {
+                                    "Service": [
+                                        "ec2.amazonaws.com"
+                                    ]
+                                },
+                                "Action": [
+                                    "sts:AssumeRole"
+                                ]
+                            }
+                        ]
+                    },
+                    "Path": "/"
+                }
+            },
+            "RolePolicies": {
+                "Type": "AWS::IAM::Policy",
+                "Properties": {
+                    "PolicyName": "S3-access",
+                    "PolicyDocument": {
+                        "Statement": [
+                            {
+                              "Effect": "Allow",
+                              "Action": "s3:*",
+                              "Resource": "*"
+                            }
+                        ]
+                    },
+                    "Roles": [
+                        {
+                            "Ref": "S3"
+                        }
+                    ]
+                }
+            },
+            "InstanceRole": {
+                "Type": "AWS::IAM::InstanceProfile",
+                "Properties": {
+                    "Path": "/",
+                    "Roles": [
+                        {
+                            "Ref": "S3"
+                        }
+                    ]
+                }
+            }
+  },
+
+  "Outputs": {
+  "Role": {
+    "Description": "Role Id",
+    "Value": { "Ref" :  "InstanceRole"}
+  },
+
+  }
+}

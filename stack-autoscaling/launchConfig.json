@@ -4,18 +4,32 @@
    "Parameters": {
   "SG": {
     "Type": "AWS::EC2::SecurityGroup::Id"
-  }
-},
+  },
+
+  "KeyPair" : {
+    "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instances",
+    "Type": "AWS::EC2::KeyPair::KeyName",
+    "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
+  },
+
+    "Role" : {
+      "Type" : "String"
+    }
+  },
+
+
 
    "Resources" : {
      "LaunchConfig" : {
        "Type" : "AWS::AutoScaling::LaunchConfiguration",
        "Properties" : {
          "AssociatePublicIpAddress" : "true",
-         "ImageId" : "ami-2051294a",
+         "ImageId" : "ami-6d1c2007",
          "SecurityGroups" : [ { "Ref" : "SG" } ],
          "InstanceType" : "t2.micro",
-         "InstanceMonitoring" : "false"
+         "KeyName" : { "Ref" : "KeyPair"},
+         "InstanceMonitoring" : "false",
+         "IamInstanceProfile" : { "Ref" : "Role"}
        }
      }
   },
