@@ -24,11 +24,19 @@
        "Type" : "AWS::AutoScaling::LaunchConfiguration",
        "Properties" : {
          "AssociatePublicIpAddress" : "true",
-         "ImageId" : "ami-6d1c2007",
+         "ImageId" : "ami-ff0273e8",
          "SecurityGroups" : [ { "Ref" : "SG" } ],
          "InstanceType" : "t2.micro",
          "KeyName" : { "Ref" : "KeyPair"},
          "InstanceMonitoring" : "false",
+         "UserData" : { "Fn::Base64" : { "Fn::Join" : [ "", [
+                "#!/bin/bash\n",
+                "cd /var/www/html\n",
+                "aws s3 cp s3://wordpress-bootstraping6/ . --recursive\n",
+                "chown -R apache:apache .\n",
+                "systemctl restart httpd"
+                    ]]}},
+
          "IamInstanceProfile" : { "Ref" : "Role"}
        }
      }
