@@ -53,6 +53,16 @@
         }
       },
 
+      "Priv2" :{
+        "Type" : "AWS::EC2::Subnet",
+        "Properties" : {
+          "VpcId" : { "Ref": "AppVPC" },
+          "CidrBlock" : "10.100.65.0/26",
+          "AvailabilityZone" : "us-east-1a",
+          "Tags" : [ {"Key" : "Name", "Value" : "private-2"} ]
+        }
+      },
+
     "IGW" :{
       "Type" : "AWS::EC2::InternetGateway",
       "Properties" : {
@@ -188,6 +198,18 @@
 
   },
 
+  "private1" : {
+    "Description": "Private1",
+    "Value" : { "Ref" : "Priv1" }
+
+  },
+
+  "private2" : {
+    "Description": "Private2",
+    "Value" : { "Ref" : "Priv2" }
+
+  },
+
   "SGElb" : {
     "Description" : "Load Balancer SecurityGroup",
     "Value" : { "Ref" : "ElbSG"}
@@ -195,6 +217,12 @@
   "InstanceSG" : {
     "Description" : "Instance/LaunchConfiguration SG",
     "Value" : { "Ref" : "PubSecurityGroup"}
-  }
+  },
+
+  "rdsSG" : {
+    "Description" : "Database SecurityGroup",
+    "Value" : { "Ref" : "DatabaseSG"}
+
     }
       }
+        }

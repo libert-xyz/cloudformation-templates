@@ -70,6 +70,18 @@
          },
          "TimeoutInMinutes": "60"
        }
-     }
+     },
+
+  "DataBase"   : {
+    "Type" : "AWS::CloudFormation::Stack",
+    "Properties" : {
+      "TemplateURL" : "https://s3.amazonaws.com/cloudformation-stack-custom/database.json",
+      "Parameters" : {
+        "vpcSG" : { "Fn::GetAtt" : [ "VPC", "Outputs.rdsSG" ] },
+        "private1" : { "Fn::GetAtt" : [ "VPC", "Outputs.private1" ] },
+        "private2" : { "Fn::GetAtt" : [ "VPC", "Outputs.private2" ] }
+          }
+        }
+      }
    }
  }

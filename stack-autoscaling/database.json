@@ -1,0 +1,55 @@
+{
+   "AWSTemplateFormatVersion" : "2010-09-09",
+   "Description" : "DataBase",
+   "Parameters": {
+  "vpcSG": {
+    "Type": "AWS::EC2::SecurityGroup::Id"
+  },
+  "private1": {
+    "Type": "AWS::EC2::Subnet::Id"
+  },
+  "private2": {
+    "Type": "AWS::EC2::Subnet::Id"
+  }
+},
+
+   "Resources" : {
+
+     "myDBSubnetGroup" : {
+  "Type" : "AWS::RDS::DBSubnetGroup",
+  "Properties" : {
+     "DBSubnetGroupDescription" : "DB Private Subnet",
+     "SubnetIds" : [{ "Ref" : "private1" },
+                    { "Ref" : "private2" }
+      ]
+  }
+},
+
+     "MyDB" : {
+
+       "Type" : "AWS::RDS::DBInstance",
+   "Properties" : {
+      "DBName" : "wordpress",
+      "AllocatedStorage" : "5",
+      "DBInstanceClass" : "db.t2.micro",
+      "Engine" : "MySQL",
+      "EngineVersion" : "5.5",
+      "DBSubnetGroupName" : { "Ref" : "myDBSubnetGroup" },
+      "MasterUsername" : "wordpress",
+      "MultiAZ" : "false",
+      "MasterUserPassword" : "wordpress",
+      "VPCSecurityGroups" : [{ "Ref" : "vpcSG" }],
+      "Tags" : [ { "Key" : "Name", "Value" : "My Database" } ]
+   },
+   "DeletionPolicy" : "Snapshot"
+
+     }
+  },
+
+  "Outputs": {
+  "LaunchConfiguration": {
+    "Description": "Db Link",
+    "Value": { "Fn::Join": [ "", [{ "Fn::GetAtt": [ "MyDB", "Endpoint.Address" ] } ] ] }
+  },
+    }
+      }
