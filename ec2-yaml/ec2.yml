@@ -1,0 +1,86 @@
+  AWSTemplateFormatVersion: "2010-09-09"
+  Description: "Simple Ec2 inside an existence VPC"
+  Parameters:
+    VPC:
+      Type: AWS::EC2::VPC::Id
+      #ParameterProperty: vpc-9611cef2
+    # SG:
+    #   Type: AWS::EC2::SecurityGroup::GroupName
+      #ParameterProperty: sg-2eff0848
+
+    SubnetId:
+      Type: AWS::EC2::Subnet::Id
+
+    SubnetIdPrivate:
+      Type: AWS::EC2::Subnet::Id
+      #ParameterProperty: subnet-7584a55e
+
+    myKeyPair:
+      Type : AWS::EC2::KeyPair::KeyName
+
+  Resources:
+    mySG:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: SG For my lab Intance
+        VpcId:
+          Ref: VPC
+        SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: "22"
+          ToPort: "22"
+          CidrIp: 0.0.0.0/0
+
+    Eth1:
+      Type: AWS::EC2::NetworkInterface
+      Properties:
+        SubnetId: !Ref SubnetIdPrivate
+        Description: Interface Private
+        GroupSet:
+          - Ref: mySG
+
+    MyEC2Instance:
+      Type: "AWS::EC2::Instance"
+      Properties:
+        AvailabilityZone: "us-east-1a"
+        BlockDeviceMappings:
+          - DeviceName: "/dev/sdm"
+            Ebs:
+              DeleteOnTermination: "true"
+              VolumeType: "standard"
+              VolumeSize: "8"
+
+          - DeviceName: "/dev/sdk"
+            Ebs:
+              DeleteOnTermination: "true"
+              VolumeType: "standard"
+              VolumeSize: "2"
+
+        ImageId: "ami-6d1c2007"
+        KeyName:
+          Ref: myKeyPair
+        InstanceInitiatedShutdownBehavior: "stop"
+        InstanceType: "t2.nano"
+        Monitoring: "false"
+        Tags:
+          - Key: Name
+            Value: LabLinux
+        NetworkInterfaces:
+          - AssociatePublicIpAddress: "true"
+            DeviceIndex: "0"
+            GroupSet:
+              - Ref: mySG
+            SubnetId:
+              Ref: SubnetId
+
+    NetworkAttach:
+      Type: AWS::EC2::NetworkInterfaceAttachment
+      Properties:
+        InstanceId:
+          Ref: MyEC2Instance
+        NetworkInterfaceId:
+          Ref: Eth1
+        DeviceIndex: 1
+
+        # SecurityGroups:
+        #   - Ref: mySG
