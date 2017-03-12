@@ -1,0 +1,60 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Hello World Example
+
+#Input Part
+Parameters:
+  VPC:
+    Description: Default VPC
+    Type: AWS::EC2::VPC::Id
+  Subnet:
+    Description: Public Subnet
+    Type: AWS::EC2::Subnet::Id
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      AMI: ami-60b6c60a
+
+#This is where the thinks are done
+Resources:
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap [RegionMap, !Ref 'AWS::Region', AMI]
+      InstanceType: t2.nano
+      NetworkInterfaces:
+      - AssociatePublicIpAddress: true
+        DeviceIndex: '0'
+        GroupSet:
+        - !Ref WebserverSecurityGroup
+        SubnetId: !Ref Subnet
+      Tags:
+      - Key: Name
+        Value: Hi World
+
+      UserData:
+        'Fn::Base64': !Sub |
+          #!/bin/bash -x
+          yum install -y httpd
+          cd /var/www/html
+          echo "<html><body>Hello World!</body></html>" > index.html
+          service httpd start
+
+  WebserverSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: security Group
+      VpcId:
+        !Ref VPC
+      SecurityGroupIngress:
+      - CidrIp: 0.0.0.0/0
+        FromPort: 80
+        IpProtocol: tcp
+        ToPort: 80
+
+
+Outputs:
+  Url:
+    Description: The web Url
+    Value: !Sub 'http://${EC2Instance.PublicIp}'

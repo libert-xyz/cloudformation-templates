@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
 
-  "Description" : "AWS CloudFormation Template AutoScalingMultiAZWithNotifications: Create a multi-az, load balanced and Auto Scaled NGINX / PHP7 FPM Web Serever. The application is configured to span all Availability Zones in the region and is Auto-Scaled based on the CPU utilization of the web servers. Notifications will be sent to the operator email address on scaling events. The instances are load balanced with a simple health check against the default web page. **WARNING** This template creates one or more Amazon EC2 instances and an Elastic Load Balancer. You will be billed for the AWS resources used if you create a stack from this template.",
+  "Description" : "AWS CloudFormation Template AutoScalingMultiAZWithNotifications: Create a multi-az, load balanced and Auto Scaled NGINX. The application is configured to span all Availability Zones in the region and is Auto-Scaled based on the CPU utilization of the web servers. Notifications will be sent to the operator email address on scaling events. The instances are load balanced with a simple health check against the default web page. **WARNING** This template creates one or more Amazon EC2 instances and an Elastic Load Balancer. You will be billed for the AWS resources used if you create a stack from this template.",
 
   "Parameters" : {
     "InstanceType" : {
@@ -366,10 +366,11 @@
       "Properties" : {
         "AllocatedStorage" : "100",
         "DBInstanceClass" : "db.t2.small",
-        "Engine" : "MySQL",
+        "Engine" : "MariaDB",
         "Iops" : "1000",
         "MasterUsername" : { "Ref" : "DBAUser" },
-        "MasterUserPassword" : { "Ref" : "DBPassword" }
+        "MasterUserPassword" : { "Ref" : "DBPassword" },
+        "VPCSecurityGroups" : [{"Ref": "DataBaseSecurityGroup"}]
       }
     },
     "RedisCluster" : {
@@ -427,6 +428,7 @@
           "WaitOnResourceSignals": "true"
         }
       }
+
     },
 "ElasticLoadBalancer" : {
       "Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
@@ -742,6 +744,18 @@
           "ToPort" : "80",
           "SourceSecurityGroupOwnerId" : {"Fn::GetAtt" : ["ElasticLoadBalancer", "SourceSecurityGroup.OwnerAlias"]},
           "SourceSecurityGroupName" : {"Fn::GetAtt" : ["ElasticLoadBalancer", "SourceSecurityGroup.GroupName"]}
+        } ]
+      }
+    },
+    "DataBaseSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "GroupDescription" : "Database access from the instances",
+        "SecurityGroupIngress" : [ {
+          "IpProtocol" : "tcp",
+          "FromPort" : "3306",
+          "ToPort" : "3306",
+          "SourceSecurityGroupName" : { "Ref" : "InstanceSecurityGroup"}
         } ]
       }
     }
