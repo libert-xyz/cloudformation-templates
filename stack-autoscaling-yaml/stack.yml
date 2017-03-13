@@ -1,0 +1,23 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: High Available and Fault Tolerant Stack
+
+######## Input Part ##########
+Parameters:
+  Keyname:
+    Description: PEM key for ec2 instances
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: Must be an existing name of a key in the account
+
+#####Services creation########
+Resources:
+  VPC:
+    Description: Stack VPC
+    Type: AWS::CloudFormation:Stack
+    Properties:
+      TemplateURL: "https://s3.amazonaws.com/cloudformation-stack-custom/vpc.json"
+      TimeoutInMinutes: 20
+
+
+Outputs:
+  

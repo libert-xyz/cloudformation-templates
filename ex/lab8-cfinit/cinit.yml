@@ -1,0 +1,74 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Lab 8: cfn-init'
+Parameters:
+  VPC:
+    Description: The default VPC
+    Type: AWS::EC2::VPC::Id
+  Subnet:
+    Description: A public subnet from default VPC.
+    Type: AWS::EC2::Subnet::Id
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      AMI: ami-60b6c60a
+
+
+Resources:
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Metadata:
+      AWS::CloudFormation::Init:
+        config:
+          packages:
+            yum:
+              httpd: []
+          files:
+            "/var/www/html/index.html":
+              content: "<html><body>Hello from CloudFormation!</body></html>"
+              mode: '000644'
+              owner: root
+              group: root
+          services:
+            sysvinit:
+              httpd:
+                enabled: true
+                ensureRunning: true
+
+    Properties:
+      ImageId: !FindInMap [RegionMap, !Ref 'AWS::Region', AMI]
+      InstanceType: t2.nano
+      NetworkInterfaces:
+      - AssociatePublicIpAddress: True
+        DeviceIndex: '0'
+        GroupSet:
+        - !Ref WebserverSecurityGroup
+        SubnetId: !Ref Subnet
+
+      Tags:
+      - Key: Name
+        Value: lab8-webserver
+
+      UserData:
+        'Fn::Base64': !Sub |
+          #!/bin/bash -ex
+          /opt/aws/bin/cfn-init -s ${AWS::StackName} -r EC2Instance --region ${AWS::Region}
+
+
+  WebserverSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: lab8-webserver
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      - CidrIp: 0.0.0.0/0
+        FromPort: 80
+        IpProtocol: tcp
+        ToPort: 80
+
+
+Outputs:
+  WebsiteURL:
+    Description: The URL pointing the webserver.
+    Value: !Sub http://${EC2Instance.PublicIp}
