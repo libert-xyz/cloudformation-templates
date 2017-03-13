@@ -1,0 +1,308 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: NuvOps - Virtual Private Cloud (us-east-1 Only)
+
+####### Services creation #########
+Resources:
+  NuvopsVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.10.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: NuvOps VPC
+        - Key: CidrBlock
+          Value: Class C/28 - 14 Hosts per Subnet / 16 Max Subnets
+
+  ## Subnets Creation ##
+
+  Pub1a:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref NuvopsVpc
+      CidrBlock: 10.10.76.0/28
+      AvailabilityZone: us-east-1a
+      Tags:
+        - Key: Name
+          Value: Pub-1a-10.10.76.0
+
+  Priv1a:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref NuvopsVpc
+      CidrBlock: 10.10.76.16/28
+      AvailabilityZone: us-east-1a
+      Tags:
+        - Key: Name
+          Value: Priv-1a-10.10.76.16
+
+  Pub1b:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref NuvopsVpc
+      CidrBlock: 10.10.76.32/28
+      AvailabilityZone: us-east-1b
+      Tags:
+        - Key: Name
+          Value: Pub-1b-10.10.76.32
+
+  Priv1b:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref NuvopsVpc
+      CidrBlock: 10.10.76.48/28
+      AvailabilityZone: us-east-1b
+      Tags:
+        - Key: Name
+          Value: Priv-1b-10.10.76.48
+
+  Pub1c:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref NuvopsVpc
+      CidrBlock: 10.10.76.64/28
+      AvailabilityZone: us-east-1c
+      Tags:
+        - Key: Name
+          Value: Pub-1c-10.10.76.64
+
+  Priv1c:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref NuvopsVpc
+      CidrBlock: 10.10.76.80/28
+      AvailabilityZone: us-east-1c
+      Tags:
+        - Key: Name
+          Value: Priv-1c-10.10.76.80
+
+  Pub1d:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref NuvopsVpc
+      CidrBlock: 10.10.76.96/28
+      AvailabilityZone: us-east-1d
+      Tags:
+        - Key: Name
+          Value: Pub-1d-10.10.76.96
+
+  Priv1d:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref NuvopsVpc
+      CidrBlock: 10.10.76.112/28
+      AvailabilityZone: us-east-1d
+      Tags:
+        - Key: Name
+          Value: Priv-1d-10.10.76.112
+
+  Pub1e:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref NuvopsVpc
+      CidrBlock: 10.10.76.128/28
+      AvailabilityZone: us-east-1e
+      Tags:
+        - Key: Name
+          Value: Pub-1e-10.10.76.128
+
+  Priv1e:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref NuvopsVpc
+      CidrBlock: 10.10.76.144/28
+      AvailabilityZone: us-east-1e
+      Tags:
+        - Key: Name
+          Value: Priv-1e-10.10.76.144
+
+  ### Internet Gateway ###
+
+  InternetGW:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value: NuvOps-IGW
+
+  AttachGW:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref NuvopsVpc
+      InternetGatewayId: !Ref InternetGW
+
+
+  ### Public Route Table ##
+
+  PubRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref NuvopsVpc
+      Tags:
+      - Key: Name
+        Value: Public Route Table
+
+  PubRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PubRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGW
+
+  ### Public Route Association ###
+
+  PubRouteAs1a:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PubRouteTable
+      SubnetId: !Ref Pub1a
+
+  PubRouteAs1b:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PubRouteTable
+      SubnetId: !Ref Pub1b
+
+  PubRouteAs1c:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PubRouteTable
+      SubnetId: !Ref Pub1c
+
+  PubRouteAs1d:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PubRouteTable
+      SubnetId: !Ref Pub1d
+
+  PubRouteAs1e:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PubRouteTable
+      SubnetId: !Ref Pub1e
+
+
+  ### Instances Security Groups ###
+
+  SecurityGroupInstances:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Instances Security Group"
+      VpcId: !Ref NuvopsVpc
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        SourceSecurityGroupId: !Ref SecurityGroupLoadBalancer
+
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        SourceSecurityGroupId: !Ref SecurityGroupLoadBalancer
+
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+
+      Tags:
+      - Key: Name
+        Value: Security Group Instances
+
+
+  ### Database Security Groups ###
+
+  SecurityGroupDatabase:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Database Security Group"
+      VpcId: !Ref NuvopsVpc
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 3306
+        ToPort: 3306
+        SourceSecurityGroupId: !Ref SecurityGroupInstances
+
+      Tags:
+      - Key: Name
+        Value: Security Group Database
+
+  ### Load Balancer Security Groups ###
+
+  SecurityGroupLoadBalancer:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Load Balancer Security Group"
+      VpcId: !Ref NuvopsVpc
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 0.0.0.0/0
+
+      Tags:
+      - Key: Name
+        Value: Security Group Load Balancer
+
+
+######### Outputs ##########
+Outputs:
+  pub1a:
+    Description: Public 1a
+    Value: !Ref Pub1a
+
+  pub1b:
+    Description: Public 1b
+    Value: !Ref Pub1b
+
+  pub1c:
+    Description: Public 1c
+    Value: !Ref Pub1c
+
+  pub1d:
+    Description: Public 1d
+    Value: !Ref Pub1d
+
+  pub1e:
+    Description: Public 1e
+    Value: !Ref Pub1e
+
+  priv1a:
+    Description: Private 1a
+    Value: !Ref Priv1a
+
+  priv1b:
+    Description: Private 1b
+    Value: !Ref Priv1b
+
+  priv1c:
+    Description: Private 1c
+    Value: !Ref Priv1c
+
+  priv1d:
+    Description: Private 1d
+    Value: !Ref Priv1d
+
+  priv1e:
+    Description: Private 1e
+    Value: !Ref Priv1e
+
+  instanceSG:
+    Description: Instance Security Group
+    Value: !Ref SecurityGroupInstances
+
+  databaseSG:
+    Description: Database Security Group
+    Value: !Ref SecurityGroupDatabase
+
+  elbSG:
+    Description: ELB Security Group
+    Value: !Ref SecurityGroupLoadBalancer

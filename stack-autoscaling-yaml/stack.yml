@@ -13,11 +13,7 @@ Parameters:
 Resources:
   VPC:
     Description: Stack VPC
-    Type: AWS::CloudFormation:Stack
+    Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: "https://s3.amazonaws.com/cloudformation-stack-custom/vpc.json"
+      TemplateURL: "https://s3.amazonaws.com/nuvops-cloudformation/nested-yml/vpc.yml"
       TimeoutInMinutes: 20
-
-
-Outputs:
-  
