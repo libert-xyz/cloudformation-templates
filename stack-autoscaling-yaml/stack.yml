@@ -16,4 +16,12 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: "https://s3.amazonaws.com/nuvops-cloudformation/nested-yml/vpc.yml"
-      TimeoutInMinutes: 20
+      TimeoutInMinutes: 12
+
+
+  Roles:
+    Description: Stack Roles and Policies
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "https://s3.amazonaws.com/nuvops-cloudformation/nested-yml/roles.yml"
+      TimeoutInMinutes: 7
