@@ -40,3 +40,15 @@ Resources:
         pub1d: !GetAtt [VPC,Outputs.pub1d]
         pub1e: !GetAtt [VPC,Outputs.pub1e]
         elbSG: !GetAtt [VPC,Outputs.elbSG]
+
+  LaunchConfiguration:
+    Description: Launch Configuration
+    Type: AWS::CloudFormation::Stack
+    DependsOn: VPC
+    Properties:
+      TemplateURL: "https://s3.amazonaws.com/nuvops-cloudformation/nested-yml/launchConfig.yml"
+      TimeoutInMinutes: 5
+      Parameters:
+        SG: !GetAtt [VPC,Outputs.instanceSG]
+        Role: !GetAtt [Roles,Outputs.instancerole]
+        KeyPair: !Ref Keyname

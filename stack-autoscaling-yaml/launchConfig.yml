@@ -1,0 +1,46 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: NuvOps Stack Launch Configuration
+
+######### Input Part ###########
+Parameters:
+  SG:
+    Description: Instance Security Group
+    Type: AWS::EC2::SecurityGroup::Id
+
+  KeyPair:
+    Description: Key dot Pem
+    Type: AWS::EC2::KeyPair::KeyName
+
+  Role:
+    Description: Instance Role
+    Type: String
+
+
+####### Services creation #########
+Resources:
+  LaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      AssociatePublicIpAddress: true
+      ImageId: ami-0b33d91d
+      #Linux AMI 2016.09.1 was released on 2017-01-23
+      InstanceType: t2.nano
+      SecurityGroups:
+      - !Ref SG
+      InstanceMonitoring: false
+      KeyName: !Ref KeyPair
+      IamInstanceProfile: !Ref Role
+      UserData:
+        'Fn::Base64': !Sub |
+          #!/bin/bash -x
+          yum install -y httpd
+          cd /var/www/html
+          echo "<html><body>Highly Available Infrastructure</body></html>" > index.html
+          service httpd start
+
+######### Outputs ##########
+Outputs:
+  LaunchConfiguration:
+    Description: Launch Configuration
+    Value: !Ref LaunchConfig
