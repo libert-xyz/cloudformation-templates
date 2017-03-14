@@ -25,3 +25,18 @@ Resources:
     Properties:
       TemplateURL: "https://s3.amazonaws.com/nuvops-cloudformation/nested-yml/roles.yml"
       TimeoutInMinutes: 7
+
+  ELB:
+    Description: Elastic Load Balancer
+    Type: AWS::CloudFormation::Stack
+    DependsOn: VPC
+    Properties:
+      TemplateURL: "https://s3.amazonaws.com/nuvops-cloudformation/nested-yml/elb.yml"
+      TimeoutInMinutes: 8
+      Parameters:
+        pub1a: !GetAtt [VPC,Outputs.pub1a]
+        pub1b: !GetAtt [VPC,Outputs.pub1b]
+        pub1c: !GetAtt [VPC,Outputs.pub1c]
+        pub1d: !GetAtt [VPC,Outputs.pub1d]
+        pub1e: !GetAtt [VPC,Outputs.pub1e]
+        elbSG: !GetAtt [VPC,Outputs.elbSG]

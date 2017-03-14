@@ -147,6 +147,7 @@ Resources:
 
   PubRoute:
     Type: AWS::EC2::Route
+    DependsOn: AttachGW
     Properties:
       RouteTableId: !Ref PubRouteTable
       DestinationCidrBlock: 0.0.0.0/0
