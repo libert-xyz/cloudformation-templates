@@ -81,7 +81,7 @@ Resources:
   ### Logs Bucket and Policy ###
   ELBLogsBucket:
     Type: AWS::S3::Bucket
-    #DeletionPolicy: Retain
+    DeletionPolicy: Retain
 
   ELBLogsBucketPolicy:
     Type: AWS::S3::BucketPolicy

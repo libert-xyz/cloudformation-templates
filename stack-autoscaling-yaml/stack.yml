@@ -52,3 +52,31 @@ Resources:
         SG: !GetAtt [VPC,Outputs.instanceSG]
         Role: !GetAtt [Roles,Outputs.instancerole]
         KeyPair: !Ref Keyname
+
+  Autoscaling:
+    Description: Autoscaling Group
+    Type: AWS::CloudFormation::Stack
+    DependsOn: ELB
+    Properties:
+      TemplateURL: "https://s3.amazonaws.com/nuvops-cloudformation/nested-yml/autoscaling.yml"
+      TimeoutInMinutes: 10
+      Parameters:
+        pub1a: !GetAtt [VPC,Outputs.pub1a]
+        pub1b: !GetAtt [VPC,Outputs.pub1b]
+        pub1c: !GetAtt [VPC,Outputs.pub1c]
+        pub1d: !GetAtt [VPC,Outputs.pub1d]
+        pub1e: !GetAtt [VPC,Outputs.pub1e]
+        launchconfig: !GetAtt [LaunchConfiguration,Outputs.LaunchConfig]
+        elb: !GetAtt [ELB, Outputs.LoadBalancer]
+
+
+  Database:
+    Description: Database
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "https://s3.amazonaws.com/nuvops-cloudformation/nested-yml/database.yml"
+      TimeoutInMinutes: 15
+      Parameters:
+        vpcSG: !GetAtt [VPC,Outputs.databaseSG]
+        priv1a: !GetAtt [VPC,Outputs.priv1a]
+        priv1b: !GetAtt [VPC,Outputs.priv1b]

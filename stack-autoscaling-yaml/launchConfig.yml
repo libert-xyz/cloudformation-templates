@@ -41,6 +41,6 @@ Resources:
 
 ######### Outputs ##########
 Outputs:
-  LaunchConfiguration:
+  LaunchConfig:
     Description: Launch Configuration
     Value: !Ref LaunchConfig

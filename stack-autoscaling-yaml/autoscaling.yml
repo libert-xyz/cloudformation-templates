@@ -1,0 +1,111 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: NuvOps AutoScaling Group
+
+######### Input Part ###########
+Parameters:
+
+  launchconfig:
+    Description: Launch Configuration
+    Type: String
+
+  pub1a:
+    Description: Public Subnets us-east-1a
+    Type: AWS::EC2::Subnet::Id
+
+  pub1b:
+    Description: Public Subnets us-east-1b
+    Type: AWS::EC2::Subnet::Id
+
+  pub1c:
+    Description: Public Subnets us-east-1c
+    Type: AWS::EC2::Subnet::Id
+
+  pub1d:
+    Description: Public Subnets us-east-1d
+    Type: AWS::EC2::Subnet::Id
+
+  pub1e:
+    Description: Public Subnets us-east-1e
+    Type: AWS::EC2::Subnet::Id
+
+  elb:
+    Description: Load Balancer
+    Type: String
+
+
+####### Services creation #########
+Resources:
+  AutoScaling:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      LaunchConfigurationName: !Ref launchconfig
+      MinSize: 1
+      MaxSize: 2
+      VPCZoneIdentifier:
+      - !Ref pub1a
+      - !Ref pub1b
+      - !Ref pub1c
+      - !Ref pub1d
+      - !Ref pub1e
+      LoadBalancerNames:
+        - !Ref elb
+
+  ScaleUpPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref AutoScaling
+      PolicyType: SimpleScaling
+      Cooldown: 30
+      ScalingAdjustment: 1
+
+  CPUAlarmHigh:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      EvaluationPeriods: 1
+      Statistic: Average
+      AlarmDescription: Alarm if CPU too high or metric disappears indicating instance is down
+      Period: 60
+      AlarmActions:
+        - !Ref ScaleUpPolicy
+      Namespace: AWS/EC2
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref AutoScaling
+      ComparisonOperator: GreaterThanThreshold
+      MetricName: CPUUtilization
+      Threshold: 70
+
+
+  ScaleDownPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref AutoScaling
+      PolicyType: SimpleScaling
+      Cooldown: 10
+      ScalingAdjustment: -1
+
+  CPUAlarmLow:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      EvaluationPeriods: 1
+      Statistic: Average
+      AlarmDescription: Alarm if CPU too low
+      Period: 60
+      AlarmActions:
+        - !Ref ScaleDownPolicy
+      Namespace: AWS/EC2
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref AutoScaling
+      ComparisonOperator: LessThanThreshold
+      MetricName: CPUUtilization
+      Threshold: 15
+
+######### Outputs ##########
+Outputs:
+  AUId:
+    Description: Autoscaling group
+    Value: !Ref AutoScaling
