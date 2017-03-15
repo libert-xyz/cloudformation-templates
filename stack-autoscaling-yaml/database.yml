@@ -1,0 +1,70 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Database NuvOps
+
+######### Input Part ###########
+Parameters:
+  vpcSG:
+    Description: Security Group
+    Type: AWS::EC2::SecurityGroup::Id
+
+  priv1a:
+    Description: Private Subnet 1
+    Type: AWS::EC2::Subnet::Id
+
+  priv1b:
+    Description: Private Subnet 2
+    Type: AWS::EC2::Subnet::Id
+
+  priv1c:
+    Description: Private Subnet 2
+    Type: AWS::EC2::Subnet::Id
+
+  priv1d:
+    Description: Private Subnet 2
+    Type: AWS::EC2::Subnet::Id
+
+  priv1e:
+    Description: Private Subnet 2
+    Type: AWS::EC2::Subnet::Id
+
+####### Services creation #########
+Resources:
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: DB Private Subnet
+      SubnetIds:
+        - !Ref priv1a
+        - !Ref priv1b
+        - !Ref priv1c
+        - !Ref priv1d
+        - !Ref priv1e
+
+  DB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBName: cloudform
+      AllocatedStorage: 5
+      AutoMinorVersionUpgrade: true
+      DBInstanceClass: db.t2.micro
+      Engine: mariadb
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      MasterUsername: nuvops
+      MasterUserPassword: spovundb1e
+      MultiAZ: false
+      PubliclyAccessible: false
+      VPCSecurityGroups:
+        - !Ref vpcSG
+      StorageType: standard
+      Tags:
+        - Key: Name
+          Value: RDS DB
+    #DeletionPolicy: "Snapshot"
+
+
+######### Outputs ##########
+Outputs:
+  DBurl:
+    Description: Database internal Endpoint
+    Value: !GetAtt ["DB","Endpoint.Address"]

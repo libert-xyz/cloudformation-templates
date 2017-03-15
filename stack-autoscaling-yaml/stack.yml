@@ -80,3 +80,6 @@ Resources:
         vpcSG: !GetAtt [VPC,Outputs.databaseSG]
         priv1a: !GetAtt [VPC,Outputs.priv1a]
         priv1b: !GetAtt [VPC,Outputs.priv1b]
+        priv1c: !GetAtt [VPC,Outputs.priv1c]
+        priv1d: !GetAtt [VPC,Outputs.priv1d]
+        priv1e: !GetAtt [VPC,Outputs.priv1e]
