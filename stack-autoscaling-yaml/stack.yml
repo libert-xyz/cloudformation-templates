@@ -75,7 +75,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: "https://s3.amazonaws.com/nuvops-cloudformation/nested-yml/database.yml"
-      TimeoutInMinutes: 15
+      TimeoutInMinutes: 20
       Parameters:
         vpcSG: !GetAtt [VPC,Outputs.databaseSG]
         priv1a: !GetAtt [VPC,Outputs.priv1a]

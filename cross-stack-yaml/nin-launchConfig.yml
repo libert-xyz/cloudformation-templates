@@ -1,0 +1,39 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: NuvOps Stack Launch Configuration
+
+######### Input Part ###########
+Parameters:
+  KeyPair:
+    Description: Key dot Pem
+    Type: AWS::EC2::KeyPair::KeyName
+
+####### Services creation #########
+Resources:
+  LaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      AssociatePublicIpAddress: true
+      ImageId: ami-f4cc1de2
+      #Ubuntu Server 16.04 LTS (HVM),EBS General Purpose (SSD) Volume Type
+      InstanceType: t2.nano
+      SecurityGroups:
+      - !ImportValue instanceSG
+      InstanceMonitoring: false
+      KeyName: !Ref KeyPair
+      IamInstanceProfile: !ImportValue instancerole
+      UserData:
+        'Fn::Base64': !Sub |
+          #!/bin/bash -x
+          apt-get install -y apache2
+          cd /var/www/html
+          echo "<html><body>Highly Available Infrastructure</body></html>" > index.html
+          systemctl restart apache2.service
+
+######### Outputs ##########
+Outputs:
+  LaunchConfig:
+    Description: Launch Configuration
+    Value: !Ref LaunchConfig
+    Export:
+      Name: LaunchConfig
