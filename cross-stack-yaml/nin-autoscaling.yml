@@ -19,6 +19,18 @@ Resources:
       LoadBalancerNames:
         - !ImportValue NINLoadBalancer
 
+    # CreationPolicy:
+    #   ResourceSignal:
+    #     Count: 1
+    #     Timeout: PT5M
+    #
+    # UpdatePolicy:
+    #   AutoScalingRollingUpdate:
+    #     MinInstancesInService: 1
+    #     MaxBatchSize: 1
+    #     PauseTime: PT10M
+    #     WaitOnResourceSignals: true
+
   ScaleUpPolicy:
     Type: AWS::AutoScaling::ScalingPolicy
     Properties:
@@ -77,3 +89,5 @@ Outputs:
   AUId:
     Description: Autoscaling group
     Value: !Ref AutoScaling
+    Export:
+      Name: AutoScaling

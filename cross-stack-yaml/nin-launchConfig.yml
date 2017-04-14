@@ -22,13 +22,23 @@ Resources:
       InstanceMonitoring: false
       KeyName: !Ref KeyPair
       IamInstanceProfile: !ImportValue instancerole
+
       UserData:
         'Fn::Base64': !Sub |
           #!/bin/bash -x
-          apt-get install -y apache2
-          cd /var/www/html
-          echo "<html><body>Highly Available Infrastructure</body></html>" > index.html
-          systemctl restart apache2.service
+          apt-get -y update
+          apt-get -y install python-pip
+          pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+          cp /usr/local/init/ubuntu/cfn-hup /etc/init.d/cfn-hup
+          chmod +x /etc/init.d/cfn-hup
+          update-rc.d cfn-hup defaults
+          service cfn-hup start
+
+          cfn-init -v --stack ${AWS::StackName} --resource LaunchConfig --region ${AWS::Region}
+          cfn-signal -e $? --stack ${AWS::StackName} --resource AutoScaling --region ${AWS::Region}
+
+
+
 
 ######### Outputs ##########
 Outputs:

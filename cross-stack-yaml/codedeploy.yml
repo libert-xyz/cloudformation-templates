@@ -1,0 +1,35 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Code Deploy
+
+
+####### Services creation #########
+Resources:
+  CodeDeployApp:
+    Type: AWS::CodeDeploy::Application
+    Properties:
+      ApplicationName: NinApp
+
+  CodeDeployAppDeploy:
+    Type: AWS::CodeDeploy::DeploymentGroup
+    Properties:
+      ApplicationName: !Ref CodeDeployApp
+      AutoScalingGroups:
+        - !ImportValue AutoScaling
+      DeploymentGroupName: Staging
+      Deployment:
+        Description: "A base App"
+        IgnoreApplicationStopFailures: true
+        Revision:
+          RevisionType: GitHub
+          GitHubLocation:
+            CommitId: 25bfb082d4f5b201b55bccda4d56b0c9b341d991
+            Repository: rschmidtz/baseApp 
+      ServiceRoleArn: !ImportValue CodeDeployRole
+
+
+######### Outputs ##########
+Outputs:
+  Url:
+    Description: CodeDeploy
+    Value: !Ref CodeDeployApp

@@ -49,6 +49,45 @@ Resources:
       Roles:
         - !Ref RoleInstances
 
+
+  ### Code Deploy Role ###
+
+  CodeDeployRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "codedeploy.amazonaws.com"
+                - "ec2.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      RoleName: !Join ["-",["CodeDeployRole", !Ref "AWS::Region"]]
+      Policies:
+        -
+          PolicyName: !Join ["-",["CodeDeployPolicy", !Ref "AWS::Region"]]
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - autoscaling:PutLifecycleHook
+                  - autoscaling:DeleteLifecycleHook
+                  - autoscaling:RecordLifecycleActionHeartbeat
+                  - autoscaling:CompleteLifecycleAction
+                  - autoscaling:DescribeAutoscalingGroups
+                  - autoscaling:PutInstanceInStandby
+                  - autoscaling:PutInstanceInService
+                  - autoscaling:DescribeLifecycleHooks
+                  - ec2:Describe*
+                Resource: "*"
+
 ######### Outputs ##########
 Outputs:
   instancerole:
@@ -56,3 +95,9 @@ Outputs:
     Value: !Ref InstanceRole
     Export:
       Name: instancerole
+
+  codedeployrole:
+    Description: Code Deploy Role
+    Value: !GetAtt CodeDeployRole.Arn
+    Export:
+      Name: CodeDeployRole
