@@ -19,6 +19,9 @@ Resources:
       LoadBalancerNames:
         - !ImportValue NINLoadBalancer
 
+      HealthCheckType: ELB
+      HealthCheckGracePeriod: 300
+
     # CreationPolicy:
     #   ResourceSignal:
     #     Count: 1

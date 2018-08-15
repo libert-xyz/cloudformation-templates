@@ -1,0 +1,74 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Create an IAM User and a S3 Bucket with read and write policy
+
+######### Input Part ###########
+Parameters:
+  BucketName:
+    Description: S3 bucket name
+    Type: String
+    ConstraintDescription: must be unique
+
+  ClientName:
+    Description: Client Name
+    Type: String
+
+  Password:
+    Description: Client must reset the default password
+    Type: String
+    Default: P@ssW0rd
+
+####### Services creation #########
+Resources:
+
+  Client:
+    Type: AWS::IAM::User
+    Properties:
+      Path: "/"
+      LoginProfile:
+        Password: !Ref Password
+        PasswordResetRequired: true
+      UserName: !Join ["-",[ !Ref ClientName, !Ref "AWS::Region"]]
+
+      Policies:
+      - PolicyName: !Join ["-",[ !Ref ClientName, "S3Policy"]]
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - s3:ListAllMyBuckets
+            Resource:
+            - 'arn:aws:s3:::*'
+          - Effect: Allow
+            Action:
+            - s3:ListBucket
+            Resource:
+            - !Join ['',['arn:','aws:s3:::',!Ref BucketName]]
+          - Effect: Allow
+            Action:
+            - s3:PutObject
+            - s3:GetObject
+            Resource:
+            - !Join ['',['arn:','aws:s3:::',!Ref BucketName,'/*']]
+
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+    DeletionPolicy: Retain
+
+######### Outputs ##########
+
+Outputs:
+  UserName:
+    Value: !Ref Client
+    Description: Username
+
+  Password:
+    Value: !Ref Password
+    Description: Password
+
+  BucketName:
+    Value: !Ref S3Bucket
+    Description: BucketName
